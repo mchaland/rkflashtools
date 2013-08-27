@@ -220,7 +220,7 @@ int main(int argc, char **argv) {
     case 'r':   /* Read FLASH */
         while (size > 0) 
         {
-            info("reading flash memory at offset 0x%08x\n", offset);
+            info("reading flash memory at offset 0x%08x\r", offset);
 
             send_cmd(h, 2, 0x80, 0x000a1400, offset, RKFT_OFF_INCR);
             recv_buf(h, 1, RKFT_BLOCKSIZE);
@@ -238,7 +238,7 @@ int main(int argc, char **argv) {
     case 'w':   /* Write FLASH */
         while (size > 0) 
         {
-            info("writing flash memory at offset 0x%08x\n", offset);
+            info("writing flash memory at offset 0x%08x\r", offset);
 
             memset(buf, 0, RKFT_BLOCKSIZE);
             if (read(0, buf, RKFT_BLOCKSIZE) <= 0) {
