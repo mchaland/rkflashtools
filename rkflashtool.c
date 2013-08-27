@@ -110,10 +110,11 @@ static void usage(void) {
           "\trkflashtool b                   \treboot device\n"
           "\trkflashtool m offset size >file \tread 0x80 bytes DRAM\n"
           "\trkflashtool i offset blocks >file \tread IDB flash\n"
+		  "\trkflashtool e offset size       \terase flash (fill with 0x%02x)\n"
           "\trkflashtool r offset size >file \tread flash\n"
           "\trkflashtool w offset size <file \twrite flash\n"
           "\trkflashtool p >file             \tfetch parameters\n\n"
-          "\toffset and size are in units of 512 bytes\n");
+          "\toffset and size are in units of 512 bytes\n", RKFT_FILLBYTE);
 }
 
 static void send_cmd(libusb_device_handle *h, int e, uint8_t flag,
