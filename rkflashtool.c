@@ -87,6 +87,7 @@ const t_pid pidtab[] = {
 
 static uint8_t cmd[31] = { 'U', 'S', 'B', 'C', };
 static uint8_t res[13];
+static uint8_t fillbyte = RKFT_FILLBYTE;
 
 static uint8_t buf[RKFT_BLOCKSIZE], cid;
 static int tmp;
@@ -110,11 +111,11 @@ static void usage(void) {
           "\trkflashtool b                   \treboot device\n"
           "\trkflashtool m offset size >file \tread 0x80 bytes DRAM\n"
           "\trkflashtool i offset blocks >file \tread IDB flash\n"
-		  "\trkflashtool e offset size       \terase flash (fill with 0x%02x)\n"
+		  "\trkflashtool e offset size [byte]  \terase flash (fill with %02x)\n"
           "\trkflashtool r offset size >file \tread flash\n"
           "\trkflashtool w offset size <file \twrite flash\n"
           "\trkflashtool p >file             \tfetch parameters\n\n"
-          "\toffset and size are in units of 512 bytes\n", RKFT_FILLBYTE);
+          "\toffset and size are in units of 512 bytes\n", fillbyte);
 }
 
 static void send_cmd(libusb_device_handle *h, int e, uint8_t flag,
@@ -158,6 +159,12 @@ int main(int argc, char **argv) {
         if (argc) usage(); 
         break;
     case 'e':
+        if ((argc < 2) || (argc > 3)) usage();
+        offset = strtoul(argv[0], NULL, 0);
+        size   = strtoul(argv[1], NULL, 0);
+		if (argc == 3)
+			fillbyte   = strtoul(argv[2], NULL, 0);
+        break;
     case 'r': 
     case 'w': 
     case 'm':
@@ -311,20 +318,20 @@ int main(int argc, char **argv) {
         }
         break;
     case 'e':   /* Erase flash */
-	memset(buf, RKFT_FILLBYTE, RKFT_BLOCKSIZE);
-	while (size>0) {
-		if (offset % RKFT_DISPLAY == 0)
-			info("erasing flash memory at offset 0x%08x\r", offset);
+		memset(buf, fillbyte, RKFT_BLOCKSIZE);
+		while (size>0) {
+			if (offset % RKFT_DISPLAY == 0)
+				info("erasing flash memory at offset 0x%08x\r", offset);
 
-		send_cmd(h, 2, 0x80, 0x000a1500, offset, RKFT_OFF_INCR);
-		send_buf(h, 2, RKFT_BLOCKSIZE);
-		recv_res(h, 1);
+			send_cmd(h, 2, 0x80, 0x000a1500, offset, RKFT_OFF_INCR);
+			send_buf(h, 2, RKFT_BLOCKSIZE);
+			recv_res(h, 1);
 
-		offset += RKFT_OFF_INCR;
-		size   -= RKFT_OFF_INCR;
-	}
-	fprintf(stderr, "\n");
-	break;
+			offset += RKFT_OFF_INCR;
+			size   -= RKFT_OFF_INCR;
+		}
+		fprintf(stderr, "\n");
+		break;
     default:
         break;
     }
